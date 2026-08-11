@@ -2,59 +2,63 @@
 
 Agent Skill для разработки в **Roblox Studio через MCP**.
 
-Что внутри: единый набор правил, по которым ИИ-агент делает
+Что внутри: единый набор правил, по которым ИИ-агент делает мультяшный детский UI, чистые модульные скрипты на Luau, игровые системы, модели и автономную проверку результата.
 
-- **мультяшный, детский, яркий UI** с простыми читаемыми шрифтами,
-- **чистые скрипты на Luau** (модульная архитектура, строгая типизация),
-- **игровые системы**: бой, NPC и ИИ, экономика, квесты, раунды, сохранения, монетизация,
-- **модели и сборку в Studio** без сломанных пивотов и якорей,
-- и главное — **без багов**: чек-листы утечек памяти, гонок загрузки, безопасности remote-ов и производительности.
+Скилл написан по стандарту [Agent Skills](https://agentskills.io/specification), поэтому подходит для **Claude / Claude Code**, **OpenCode** и **Codex**.
 
-Скилл написан по стандарту [Agent Skills](https://agentskills.io/specification), поэтому работает сразу в **Claude / Claude Code**, **opencode** и **Codex**.
+## Главное в v3
+
+- Поиск по DataModel: имя, класс, содержимое, references, `require`, теги и зависимости.
+- Карта проекта до изменений, проверка состояния Studio и проверка дубликатов.
+- Надёжный цикл `Inspect → Plan → Change → Verify → Recover` с hard reset и защитой от зацикливания.
+- Автономная отладка через Output, F9, Script Analysis и `ScriptDebuggerService`, если доступен.
+- Автономный Playtest: клиент/сервер, повтор сценария, screenshots, mobile, controller и multiplayer, если поддерживается MCP.
+- API research перед незнакомыми методами, а не генерация сигнатуры из памяти.
+- Шаблоны Inventory, Shop, Quest, Dialogue, Combat, Round, Lobby, NPC, Boss, Tycoon, Simulator, Obby, Tower Defense, Pet, Trading и Crafting.
 
 ## Структура
 
 ```
 skills/roblox-studio/
-├── SKILL.md                      точка входа: рабочий цикл, 7 правил, маршрутизация
-├── references/                   29 гайдов, грузятся по необходимости
+├── SKILL.md                      точка входа и обязательный цикл агента
+├── references/                   35 гайдов, грузятся по необходимости
+│   ├── project-search.md         карта проекта, поиск, references и зависимости
+│   ├── agent-state-loop.md       транзакции, hard reset, откат, антизацикливание
+│   ├── autonomous-debugging.md   Output, stack trace, breakpoints, runtime state
+│   ├── playtesting-and-visual.md Play, Run, input, multiplayer, screenshots, mobile
+│   ├── api-research.md           актуальная документация и проверка сигнатур
+│   ├── system-templates.md       каркасы типовых игровых систем
 │   ├── mcp-workflow.md           безопасная работа в живой сессии Studio
-│   ├── engine-basics.md          Explorer, Properties, типы скриптов, клиент-сервер, remote
-│   ├── api-and-docs.md           поиск в API, deprecated, Script Analysis
+│   ├── engine-basics.md          Explorer, Properties, типы скриптов, client/server
+│   ├── api-and-docs.md           поиск API, deprecated, Script Analysis
 │   ├── datatypes.md              Vector3, CFrame, UDim2, Color3, случайность
 │   ├── architecture.md           структура проекта и модулей
 │   ├── luau-style.md             стиль кода и типизация
 │   ├── ui-style.md               мультяшный визуальный язык
 │   ├── ui-implementation.md      адаптивность, мобилки, safe area
-│   ├── ui-screens.md             HUD, загрузка, настройки, инвентарь, магазин, туториал
+│   ├── ui-screens.md              HUD, загрузка, настройки, инвентарь, магазин
 │   ├── building-models.md        3D-сборка, пивоты, теги, атрибуты
-│   ├── physics-and-raycast.md    физика, collision groups, raycast, network ownership
-│   ├── input-and-interaction.md  ввод, промпты, твины, циклы
+│   ├── physics-and-raycast.md    физика, collision groups, raycast, streaming
+│   ├── input-and-interaction.md  ввод, prompts, твины, циклы, Debris
 │   ├── character-and-camera.md   Humanoid, анимации, камера, движение, статусы
 │   ├── combat.md                 здоровье, урон, оружие, хитбоксы
-│   ├── npc-and-ai.md             NPC, состояния, pathfinding, боссы, диалоги
-│   ├── economy-and-progression.md валюта, инвентарь, магазин, квесты, XP, баланс
+│   ├── npc-and-ai.md             NPC, pathfinding, боссы, диалоги
+│   ├── economy-and-progression.md валюта, инвентарь, магазин, квесты, XP
 │   ├── rounds-and-teams.md       раунды, лобби, спавн, чекпоинты, команды
 │   ├── data-and-services.md      DataStore, лидерборды, MemoryStore, телепорты
-│   ├── monetization.md           Game Passes, Developer Products, ProcessReceipt, бейджи
-│   ├── audio-visual.md           звук, музыка, свет, атмосфера, VFX, погода
+│   ├── monetization.md           Game Passes, Developer Products, бейджи
+│   ├── audio-visual.md           звук, музыка, свет, атмосфера, VFX
 │   ├── procedural-generation.md  генерация карт и контента
-│   ├── genre-playbooks.md        симулятор, тайкун, обби, TD, FPS, RPG, survival, horror
-│   ├── bug-prevention.md         главный анти-баг чек-лист
-│   ├── debugging.md              чтение Output, поиск причин, охота за утечками
-│   ├── security.md               не доверяй клиенту
-│   ├── performance.md            бюджеты кадра и памяти
-│   ├── testing.md                проверка перед сдачей
+│   ├── genre-playbooks.md        симулятор, тайкун, обби, TD, FPS, RPG, survival
+│   ├── bug-prevention.md         анти-баг чек-лист
+│   ├── debugging.md              ручная диагностика и утечки
+│   ├── security.md               серверная безопасность и античит
+│   ├── performance.md            FPS, память, сеть и MicroProfiler
+│   ├── testing.md                итоговая проверка
 │   ├── admin-and-moderation.md   права, фильтрация, баны
-│   ├── existing-projects.md      чужой проект, зависимости, code review, рефакторинг
+│   ├── existing-projects.md      зависимости, code review, рефакторинг
 │   └── big-tasks.md              от ТЗ до системы
 └── snippets/                     готовые модули с --!strict
-    ├── Theme.lua                 палитра, шрифты, тайминги
-    ├── CartoonButton.lua         кнопка в стиле, с пружинкой
-    ├── Trove.lua                 уборка соединений
-    ├── RemoteGuard.lua           валидация и кулдауны remote
-    ├── DataStoreService.lua      безопасное сохранение
-    └── ServiceTemplate.lua       каркас новой системы
 ```
 
 ## Установка
@@ -62,27 +66,19 @@ skills/roblox-studio/
 ```bash
 git clone https://github.com/beknuramantay2-del/roblox-studio-skill.git
 cd roblox-studio-skill
-bash scripts/install.sh          # ставит глобально, для всех проектов
-bash scripts/install.sh --local  # ставит только в текущий проект
+bash scripts/install.sh          # глобально
+bash scripts/install.sh --local  # только текущий проект
 ```
 
-Или вручную скопируй папку `skills/roblox-studio` в одно из мест:
+Пути: Claude Code `~/.claude/skills/roblox-studio/`, OpenCode `~/.config/opencode/skills/roblox-studio/` или `.opencode/skills/roblox-studio/`, Codex/прочие `.agents/skills/roblox-studio/`. В проекте также можно использовать `.claude/skills/`.
 
-| Клиент | Путь |
-| --- | --- |
-| Claude Code (глобально) | `~/.claude/skills/roblox-studio/` |
-| Claude Code (проект) | `.claude/skills/roblox-studio/` |
-| opencode (глобально) | `~/.config/opencode/skills/roblox-studio/` |
-| opencode (проект) | `.opencode/skills/roblox-studio/` |
-| Codex и прочие | `.agents/skills/roblox-studio/` плюс упоминание в `AGENTS.md` |
+## Ограничения
 
-opencode также читает `.claude/skills/`, так что одной установки обычно хватает на оба клиента.
-
-В Claude.ai скилл добавляется как папка через настройки Skills: загрузи `skills/roblox-studio` целиком.
+Debugger, Playtest Agent, screenshots, device simulation и virtual input зависят от версии Roblox Studio и конкретного MCP-клиента. Скилл требует фактическую проверку и не позволяет агенту выдавать недоступную проверку за выполненную.
 
 ## Подключение Studio
 
-MCP-сервер встроен в Roblox Studio. Включи его в настройках Studio, подключи клиента (`claude mcp add`, `opencode.json` или `~/.codex/config.toml`) и держи нужный `.rbxl` открытым: агент работает с той сессией, которая открыта прямо сейчас.
+MCP-сервер встроен в Roblox Studio. Подключи клиента и держи нужный `.rbxl` открытым: агент работает с активной сессией.
 
 ## Лицензия
 
