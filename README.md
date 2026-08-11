@@ -6,6 +6,7 @@ Agent Skill для разработки в **Roblox Studio через MCP**.
 
 - **мультяшный, детский, яркий UI** с простыми читаемыми шрифтами,
 - **чистые скрипты на Luau** (модульная архитектура, строгая типизация),
+- **игровые системы**: бой, NPC и ИИ, экономика, квесты, раунды, сохранения, монетизация,
 - **модели и сборку в Studio** без сломанных пивотов и якорей,
 - и главное — **без багов**: чек-листы утечек памяти, гонок загрузки, безопасности remote-ов и производительности.
 
@@ -15,19 +16,45 @@ Agent Skill для разработки в **Roblox Studio через MCP**.
 
 ```
 skills/roblox-studio/
-├── SKILL.md                  # точка входа: рабочий цикл + маршрутизация
-├── references/               # подробные гайды, грузятся по необходимости
-│   ├── mcp-workflow.md       # как безопасно работать через Studio MCP
-│   ├── architecture.md       # структура проекта и модулей
-│   ├── luau-style.md         # стиль кода и типы
-│   ├── ui-style.md           # мультяшный визуальный язык (палитра, шрифты, анимации)
-│   ├── ui-implementation.md  # Scale/Offset, адаптивность, мобилки
-│   ├── building-models.md    # 3D-сборка, пивоты, теги, атрибуты
-│   ├── bug-prevention.md     # главный анти-баг чек-лист
-│   ├── security.md           # не доверяй клиенту
-│   ├── performance.md        # бюджеты кадра и памяти
-│   └── testing.md            # проверка перед сдачей
-└── snippets/                 # готовые шаблоны кода
+├── SKILL.md                      точка входа: рабочий цикл, 7 правил, маршрутизация
+├── references/                   21 гайд, грузятся по необходимости
+│   ├── mcp-workflow.md           безопасная работа в живой сессии Studio
+│   ├── engine-basics.md          Explorer, Properties, типы скриптов, клиент-сервер, remote
+│   ├── api-and-docs.md           поиск в API, deprecated, Script Analysis
+│   ├── datatypes.md              Vector3, CFrame, UDim2, Color3, случайность
+│   ├── architecture.md           структура проекта и модулей
+│   ├── luau-style.md             стиль кода и типизация
+│   ├── ui-style.md               мультяшный визуальный язык
+│   ├── ui-implementation.md      адаптивность, мобилки, safe area
+│   ├── ui-screens.md             HUD, загрузка, настройки, инвентарь, магазин, туториал
+│   ├── building-models.md        3D-сборка, пивоты, теги, атрибуты
+│   ├── physics-and-raycast.md    физика, collision groups, raycast, network ownership
+│   ├── input-and-interaction.md  ввод, промпты, твины, циклы
+│   ├── character-and-camera.md   Humanoid, анимации, камера, движение, статусы
+│   ├── combat.md                 здоровье, урон, оружие, хитбоксы
+│   ├── npc-and-ai.md             NPC, состояния, pathfinding, боссы, диалоги
+│   ├── economy-and-progression.md валюта, инвентарь, магазин, квесты, XP, баланс
+│   ├── rounds-and-teams.md       раунды, лобби, спавн, чекпоинты, команды
+│   ├── data-and-services.md      DataStore, лидерборды, MemoryStore, телепорты
+│   ├── monetization.md           Game Passes, Developer Products, ProcessReceipt, бейджи
+│   ├── audio-visual.md           звук, музыка, свет, атмосфера, VFX, погода
+│   ├── procedural-generation.md  генерация карт и контента
+│   ├── genre-playbooks.md        симулятор, тайкун, обби, TD, FPS, RPG, survival, horror
+│   ├── bug-prevention.md         главный анти-баг чек-лист
+│   ├── debugging.md              чтение Output, поиск причин, охота за утечками
+│   ├── security.md               не доверяй клиенту
+│   ├── performance.md            бюджеты кадра и памяти
+│   ├── testing.md                проверка перед сдачей
+│   ├── admin-and-moderation.md   права, фильтрация, баны
+│   ├── existing-projects.md      чужой проект, зависимости, code review, рефакторинг
+│   └── big-tasks.md              от ТЗ до системы
+└── snippets/                     готовые модули с --!strict
+    ├── Theme.lua                 палитра, шрифты, тайминги
+    ├── CartoonButton.lua         кнопка в стиле, с пружинкой
+    ├── Trove.lua                 уборка соединений
+    ├── RemoteGuard.lua           валидация и кулдауны remote
+    ├── DataStoreService.lua      безопасное сохранение
+    └── ServiceTemplate.lua       каркас новой системы
 ```
 
 ## Установка
@@ -47,15 +74,15 @@ bash scripts/install.sh --local  # ставит только в текущий �
 | Claude Code (проект) | `.claude/skills/roblox-studio/` |
 | opencode (глобально) | `~/.config/opencode/skills/roblox-studio/` |
 | opencode (проект) | `.opencode/skills/roblox-studio/` |
-| Codex / прочие | `.agents/skills/roblox-studio/` + строчка про скилл в `AGENTS.md` |
+| Codex и прочие | `.agents/skills/roblox-studio/` плюс упоминание в `AGENTS.md` |
 
 opencode также читает `.claude/skills/`, так что одной установки обычно хватает на оба клиента.
 
-В Claude.ai скилл добавляется как папка через настройки Skills — просто загрузи `skills/roblox-studio` целиком.
+В Claude.ai скилл добавляется как папка через настройки Skills: загрузи `skills/roblox-studio` целиком.
 
 ## Подключение Studio
 
-MCP-сервер встроен в Roblox Studio. Включи его в настройках Studio, подключи клиента (`claude mcp add`, `opencode.json` или `~/.codex/config.toml`) и держи нужный `.rbxl` открытым — агент работает с той сессией, которая открыта прямо сейчас.
+MCP-сервер встроен в Roblox Studio. Включи его в настройках Studio, подключи клиента (`claude mcp add`, `opencode.json` или `~/.codex/config.toml`) и держи нужный `.rbxl` открытым: агент работает с той сессией, которая открыта прямо сейчас.
 
 ## Лицензия
 
