@@ -17,7 +17,7 @@ Agent Skill для разработки в **Roblox Studio через MCP**.
 ```
 skills/roblox-studio/
 ├── SKILL.md                      точка входа: рабочий цикл, 7 правил, маршрутизация
-├── references/                   21 гайд, грузятся по необходимости
+├── references/                   29 гайдов, грузятся по необходимости
 │   ├── mcp-workflow.md           безопасная работа в живой сессии Studio
 │   ├── engine-basics.md          Explorer, Properties, типы скриптов, клиент-сервер, remote
 │   ├── api-and-docs.md           поиск в API, deprecated, Script Analysis
