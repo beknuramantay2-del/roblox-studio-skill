@@ -4,12 +4,14 @@
 
 ## Обязательное поведение
 
-Для любой задачи по Roblox сначала загрузи `skills/roblox-studio/SKILL.md`. Он задаёт цикл `Inspect → Plan → Change → Verify → Recover`.
+Для Roblox-задачи сначала загрузи `skills/roblox-studio/SKILL.md` и следуй циклу `Inspect → Plan → Change → Verify → Recover`.
 
-Перед изменением: проверь режим Studio, составь короткую карту DataModel, найди существующие объекты/скрипты/references и проверь отсутствие дубликатов.
+Перед изменением: проверь режим Studio и capability matrix, составь короткую карту DataModel, найди существующие объекты/скрипты/references, проверь дубликаты, контракт, схему данных и checkpoint.
 
-После изменения: проверь Explorer и Properties, Script Analysis, Output/F9 и пользовательский Playtest. Не продолжай после критической ошибки, не повторяй операцию без проверки результата и делай hard reset при неожиданном состоянии.
+После изменения: проверь DataModel/Properties, Script Analysis, Output/F9, повторяемый fixture и Playtest. Для крупной задачи пройди release gates и отчитай `pass/fail/not tested`.
 
-Если доступен отдельный Data Model Search subagent, используй его для длинного исследования, чтобы не засорять контекст основного агента. Если debugger, screenshots, device simulation, multiplayer или virtual input недоступны, честно отмечай это и не выдумывай результат.
+После критической ошибки остановись, сделай hard reset и откати только последний change-set. Не продолжай вслепую и не повторяй операцию без проверки результата.
 
-Подробные правила находятся в `references/`; загружай только ветки, относящиеся к текущей задаче. Установленные копии не редактируй: source of truth находится в `skills/roblox-studio/`.
+Используй Data Model Search subagent для длинной разведки, если он доступен. Если debugger, screenshots, device simulation, multiplayer или virtual input недоступны, используй fallback и честно пометь ограничение.
+
+Подробности загружай из `references/` только по ветке текущей задачи. Source of truth находится в `skills/roblox-studio/`, установленные копии не редактируй.
