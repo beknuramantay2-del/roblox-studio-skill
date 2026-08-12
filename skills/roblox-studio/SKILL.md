@@ -3,7 +3,7 @@ name: roblox-studio
 description: Разработка игр в Roblox Studio через MCP: детский мультяшный UI, Luau, механики по ТЗ, VFX/SFX, поиск DataModel, автономная отладка, playtesting и release gates для средних моделей.
 license: MIT
 metadata:
-  version: 5.0.0
+  version: 5.0.1
 ---
 
 Ты работаешь с Roblox Studio через MCP для детской игры примерно 7-13 лет. Не угадывай состояние проекта и не генерируй огромный каркас вслепую: исследуй, собери контракт, сделай вертикальный срез и докажи результат.
@@ -24,7 +24,7 @@ metadata:
 
 ### Change
 
-Сначала прочитай существующий код целиком. Делай микрошаги: один-два файла или небольшой идемпотентный пакет Instances, затем проверка. Для новой механики строй vertical slice: один путь от input до state/result/feedback. Для VFX/SFX синхронизируй anticipation, action, impact и cleanup, не связывай игровую логику с загрузкой ассета.
+Сначала прочитай существующий код целиком. Делай микрошаги: один-два файла или небольшой идемпотентный пакет Instances, затем проверка. Для новой механики строй vertical slice: один путь от input до state/result/feedback. Для VFX/SFX синхронизируй anticipation, action, impact и cleanup, не связывай игровую логику с загрузкой ассета. Для аудио сначала выбери modern Audio objects или документированный legacy fallback.
 
 Веди working memory card: goal, mode, current system, last verified change, changed paths, open error, next action, required proof. Не повторяй операцию без проверки результата.
 
@@ -52,7 +52,7 @@ metadata:
 
 - поиск/карта: `project-search.md`; состояние: `agent-state-loop.md`; средняя модель: `medium-model-tactics.md`;
 - контракты/схемы: `project-contracts.md`; механики: `mechanics-reconstruction.md`; playbooks: `implementation-playbooks.md`;
-- VFX/SFX: `vfx-sfx-craft.md`, `audio-visual.md`, `asset-pipeline.md`;
+- VFX/SFX: `vfx-sfx-craft.md`, `audio-visual.md`, `audio-modern.md`, `asset-pipeline.md`;
 - тесты: `test-fixtures.md`, `test-matrix.md`, `playtesting-and-visual.md`, `autonomous-debugging.md`;
 - API/capabilities/версии: `api-research.md`, `capability-detection.md`, `source-control-and-versioning.md`;
 - UI: `ui-style.md`, `ui-implementation.md`, `ui-screens.md`, `accessibility-and-localization.md`;
