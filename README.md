@@ -2,15 +2,28 @@
 
 Agent Skill для разработки игр в **Roblox Studio через MCP**. Подходит для Claude/Claude Code, OpenCode и Codex.
 
-## v5: что добавилось
+## v5.1: защита от недопонимания и типичных ошибок
 
-- **Mechanics reconstruction:** core loop, entities, states, authority, failure cases и vertical slices для воссоздания механик по ТЗ или референсу.
-- **VFX/SFX craft:** recipes для ParticleEmitter, Beam, Trail, timing, impact, audio layers, pooling, fallback и asset contracts.
-- **Implementation playbooks:** отдельный порядок для механики, UI, NPC/boss, экономики и изменений существующей системы.
-- **Medium-model tactics:** working-memory card, micro-steps, anti-drift и stop conditions.
-- **Test matrix:** client/server, mobile, touch, controller, data failure, NPC, VFX/SFX, performance soak и regression evidence.
+Добавлено то, где средние модели чаще всего тупят:
 
-Вместе с v4 это даёт не просто справочник, а рабочий протокол: **исследовать → спроектировать → собрать vertical slice → проверить → расширить**.
+- перевод русского/размытого запроса в implementation brief;
+- failure-pattern preflight для правдоподобно неправильного Luau и Roblox-кода;
+- семантика Edit vs runtime DataModel, Starter containers, replication, signal ordering, yield и Streaming;
+- ментальная модель Luau: tables, nil, `:` vs `.`, metatables, optional types, task ordering и typed results;
+- архитектурные решения: ModuleScript vs BindableEvent vs Remote, snapshot + events, один writer, idempotency и state transitions;
+- библиотека паттернов Interaction, Combat, Simulator, NPC, Round, Trading, Crafting, Abilities и Loading;
+- обязательная проверка после yield и доказательство результата, а не только успешная компиляция.
+
+Roblox-документация подтверждает ключевые основания: RemoteEvent не yield, RemoteFunction yield, `UnreliableRemoteEvent` подходит только для некритичных непрерывных данных, сервер владеет состоянием, а DataModel Search и testing tools нужно использовать по capability, не выдумывать.
+
+## Как проверить среднюю модель
+
+1. `добавь в существующую игру питомцев, но сначала составь implementation brief и найди все связанные системы`;
+2. `сделай меч с hitbox, cooldown, hit VFX/SFX и проверь, что клиент не может подделать урон`;
+3. `почему после респавна кнопка срабатывает дважды, найди причину и докажи исправление`;
+4. `сделай simulator loop: collect, sell, upgrade, unlock, сначала один vertical slice`.
+
+Плохой результат: модель сразу создаёт десятки файлов и говорит «готово». Хороший: interpretation, карта проекта, контракт, маленький change-set, evidence и `pass/fail/not tested`.
 
 ## Установка
 
@@ -22,14 +35,6 @@ bash scripts/install.sh --local  # текущий проект
 ```
 
 Пути: Claude Code `~/.claude/skills/roblox-studio/`, OpenCode `~/.config/opencode/skills/roblox-studio/` или `.opencode/skills/roblox-studio/`, Codex/прочие `.agents/skills/roblox-studio/`. В проекте можно использовать `.claude/skills/`.
-
-## Что тестировать после установки
-
-1. `найди все зависимости магазина и составь карту проекта`;
-2. `создай одну механику сбора монетки с мультяшным VFX/SFX и проверь vertical slice`;
-3. `сделай NPC с телеграфом атаки, проверь respawn, два клиента и недоступные MCP-возможности`.
-
-Ожидаемый ответ агента должен содержать карту, изменённые пути, evidence и `pass/fail/not tested`. Если модель сразу создаёт десятки файлов, она игнорирует скилл.
 
 ## Ограничения
 
