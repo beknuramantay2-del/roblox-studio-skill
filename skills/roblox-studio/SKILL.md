@@ -1,63 +1,47 @@
 ---
 name: roblox-studio
-description: Разработка игр в Roblox Studio через MCP: детский мультяшный UI, Luau, механики по ТЗ, VFX/SFX, поиск DataModel, автономная отладка и защита от типичных ошибок средних моделей.
+description: Разработка игр в Roblox Studio через MCP: перевод запроса в план, Luau, механики, VFX/SFX, поиск DataModel, автономная проверка и безопасный release workflow.
 license: MIT
 metadata:
-  version: 5.1.0
+  version: 5.2.0
 ---
 
-Ты работаешь с Roblox Studio через MCP для детской игры примерно 7-13 лет. Переводи запрос человека в implementation brief, исследуй существующий DataModel, собери контракт и vertical slice, затем докажи результат.
+Работай с Roblox Studio как проверяемый инженерный агент. Не угадывай состояние проекта и не генерируй большой каркас до разведки.
 
-## Обязательный цикл
+## Маршрут
 
-`Interpret → Inspect → Plan → Change → Verify → Continue`; при ошибке `InspectError → Recover → Verify`.
+1. **Interpret:** переведи запрос в goal, player action, state change, ownership, feedback, failure cases, proof и out of scope. Если проект не задаёт иное, используй мультяшный mobile-first UI для детской аудитории.
+2. **Inspect:** проверь Studio mode/capabilities, карту DataModel, существующие objects/scripts/references/require/tags/attributes и Output. Для большого проекта используй `project-search.md`.
+3. **Plan:** выбери один playbook, опиши data schema, one writer per domain value, public API, remote contract, acceptance criteria и checkpoint. Незнакомый API/asset/capability сначала проверь.
+4. **Change:** сделай минимальный vertical slice, затем проверку. После yield перепроверь player, Instance и state. Не повторяй операцию без проверки результата.
+5. **Verify:** DataModel/Properties, Script Analysis, Output/F9, happy/negative/repeat/respawn/leave/reconnect/two-client tests, mobile UI и performance по доступности инструментов.
+6. **Recover:** при критической ошибке остановись, сохрани stack trace, hard reset и откати последний change-set или пометь новый объект `_draft`. После двух одинаковых безрезультатных попыток измени гипотезу.
 
-### Interpret
+## Decision rules
 
-Сначала выпиши goal, player action, expected feedback, state change, server/client ownership, existing paths, failure cases, proof и out of scope. Читай `references/request-translation.md`. Если запрос основан на референсе, извлекай поведение и темп, но не копируй защищённые ассеты или контент.
+| Вопрос | Выбор |
+|---|---|
+| Состояние игры, деньги, урон, права, покупки? | Server authority, клиент только просит/показывает |
+| Связь client/server? | `RemoteEvent` по умолчанию; `UnreliableRemoteEvent` только для частого некритичного визуального потока; `RemoteFunction` только когда синхронный ответ действительно нужен и timeout/отказ безопасны |
+| UI/layout? | Scale для responsive части, Offset допустим для фиксированных пиксельных элементов; constraints и safe area проверять |
+| Shared API или config? | ModuleScript; событие между скриптами одной стороны? BindableEvent/BindableFunction |
+| Edit или Play? | DataModel меняй в Edit; runtime проверяй в Play/Run, не считай runtime-правки сохранёнными |
+| Незнакомый API? | Creator Hub research, затем минимальный probe |
+| Доступна capability? | используй; недоступна? fallback и `not tested`, без выдуманного evidence |
+| Новый VFX/SFX? | event contract, asset ownership, anticipation/action/impact, cleanup/pooling, fallback |
 
-### Inspect
+## Non-negotiables
 
-Проверь Studio mode и capability matrix. Составь короткую карту DataModel, найди объекты, скрипты, references, `require`, tags, attributes и активные ошибки. Используй `references/ai-failure-patterns.md` как preflight; для длинного поиска используй Data Model Search, если доступен.
+- Сервер владеет критичным состоянием и валидирует входные данные.
+- Новый Luau-файл начинается с `--!strict`; Script Analysis нельзя прятать пустым `pcall` или `:: any` без причины.
+- У connections, Instances, VFX и Sounds есть lifecycle/cleanup plan.
+- Не удаляй чужие объекты без согласования.
+- Не говори `готово` без evidence либо честного `not tested`.
 
-### Plan
+## Progressive disclosure
 
-Разбей задачу на core loop, entities, states и systems. Зафиксируй data schema/migration, один writer для каждого domain value, public API, remote contract, acceptance table, fallback и выбранный playbook. Для незнакомого API/asset/capability сначала сделай документационный research или безопасный probe.
+Загружай только нужные references: запрос `request-translation.md`; поиск `project-search.md`; Luau `luau-mental-model.md` и `ai-failure-patterns.md`; Roblox semantics `roblox-semantics.md`; механика `mechanics-reconstruction.md`/`mechanics-patterns.md`; VFX/SFX `vfx-sfx-craft.md`; тесты `test-matrix.md`/`autonomous-debugging.md`; API/capabilities `api-research.md`/`capability-detection.md`; release `release-readiness.md`.
 
-### Change
+## Report
 
-Прочитай существующий код целиком. Делай микрошаги и vertical slice: input → validation → state/result → feedback → cleanup. Для VFX/SFX используй recipe из `vfx-sfx-craft.md`, для механик `mechanics-patterns.md`. После каждого yield revalidate player, Instance и state. Не повторяй операцию без проверки.
-
-### Verify
-
-Проверь DataModel/Properties, Script Analysis, Output/F9, happy/negative path, spam, duplicate, respawn, leave, reconnect, two clients и regression. Для UI/VFX сделай screenshot или ручную viewport-проверку на mobile/touch/controller. Для performance измерь baseline, stress и soak. Перед `готово` пройди failure-pattern preflight и `test-matrix.md`; каждая проверка имеет `pass/fail/not tested` и evidence.
-
-### Recover
-
-После критической ошибки остановись, сохрани stack trace, hard reset, откати последний change-set или пометь новый объект `_draft`, затем повтори тот же тест. После двух безрезультатных попыток измени гипотезу или попроси уточнение.
-
-## Невзламываемые правила
-
-1. Сервер владеет истиной: клиент не определяет валюту, предметы, урон, покупки, права, победы или сохранения.
-2. У каждого connection, Instance, VFX и Sound есть cleanup/pooling план.
-3. Новый Luau-файл начинается с `--!strict` и проходит Script Analysis.
-4. UI mobile-first, доступный, локализуемый и мультяшный.
-5. API, asset id, capability и смысл не выдумываются.
-6. Ошибка не маскируется пустым `pcall`, удалением логов или бесконечными retry.
-7. Не говори `готово`, пока есть evidence или честный `not tested`.
-
-## Маршрутизация
-
-- перевод запроса: `request-translation.md`; ошибки ИИ/Roblox: `ai-failure-patterns.md`; Luau: `luau-mental-model.md`;
-- семантика Roblox: `roblox-semantics.md`; архитектура: `architecture-decisions.md`;
-- механики: `mechanics-reconstruction.md`, `mechanics-patterns.md`, `implementation-playbooks.md`;
-- VFX/SFX: `vfx-sfx-craft.md`, `audio-visual.md`, `audio-modern.md`, `asset-pipeline.md`;
-- поиск/состояние/тесты: `project-search.md`, `medium-model-tactics.md`, `test-fixtures.md`, `test-matrix.md`, `autonomous-debugging.md`;
-- API/capabilities/версии: `api-research.md`, `capability-detection.md`, `source-control-and-versioning.md`;
-- UI: `ui-style.md`, `ui-implementation.md`, `ui-screens.md`, `accessibility-and-localization.md`;
-- безопасность/performance/release: `security.md`, `safety-and-policy.md`, `performance.md`, `release-readiness.md`;
-- остальные механики: соответствующие guides в `references/`.
-
-## Формат отчёта
-
-Цель, interpretation, изменённые пути, карта шагов, evidence (`pass/fail/not tested`), ограничения и следующий ручной шаг. Пиши так, чтобы другой агент мог продолжить без повторного исследования.
+Укажи interpretation, изменённые пути, доказательства, `pass/fail/not tested`, ограничения и следующий ручной шаг. Полный набор guides остаётся доступен, но не загружай его целиком без причины.

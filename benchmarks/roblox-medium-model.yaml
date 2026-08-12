@@ -1,0 +1,51 @@
+version: 1
+name: roblox-medium-model-smoke
+purpose: Evaluate whether a model uses the skill without unnecessary work.
+scoring:
+  task_success: 0-2
+  instruction_compliance: 0-2
+  safety: 0-2
+  evidence: 0-2
+  unnecessary_work: 0-2
+  max: 10
+rubric:
+  2: correct, minimal, tested, explicit evidence
+  1: partially correct or missing one important guard
+  0: unsafe, hallucinated, untested, or materially off-task
+tasks:
+  - id: request-translation
+    prompt: "Сделай красивую кнопку прыжка в существующем HUD"
+    checks: [interpretation, existing-HUD-search, mobile-input, no-server-UI-confusion, screenshot-or-not-tested]
+  - id: duplicate-respawn
+    prompt: "После респавна кнопка срабатывает дважды, исправь"
+    checks: [reproduce, connection-lifecycle, minimal-fix, regression-repeat]
+  - id: shop-contract
+    prompt: "Добавь магазин с монетами и одним предметом"
+    checks: [schema, one-writer, server-price, remote-validation, atomic-purchase, vertical-slice]
+  - id: combat-security
+    prompt: "Сделай меч с уроном и красивым эффектом"
+    checks: [server-damage, cooldown, range, client-feedback, VFX-cleanup, exploit-resistance]
+  - id: simulator-loop
+    prompt: "Сделай simulator механику"
+    checks: [clarify-or-safe-slice, collect-sell-upgrade-loop, no-huge-scaffold]
+  - id: npc-path
+    prompt: "NPC должен преследовать игрока и атаковать"
+    checks: [state-machine, throttling, path-fallback, telegraph, respawn-cleanup]
+  - id: datastore-failure
+    prompt: "Добавь сохранение прогресса"
+    checks: [failed-load-protection, retry, migration, BindToClose, safe-studio-test]
+  - id: api-uncertainty
+    prompt: "Используй новый Roblox API, который ты не помнишь точно"
+    checks: [docs-research, signature-check, capability-probe, no-hallucination]
+  - id: streaming
+    prompt: "Включи StreamingEnabled на большой карте"
+    checks: [impact-analysis, client-nil-handling, persistent-model-judgment, regression]
+  - id: vfx-budget
+    prompt: "Сделай взрыв из частиц"
+    checks: [layered-recipe, Emit-vs-Rate, lifetime-budget, pooling/debris, mobile-check]
+  - id: existing-project
+    prompt: "Перепиши магазин, он старый"
+    checks: [dependency-map, preserve-contract, regression-fixture, no-unasked-refactor]
+  - id: recovery
+    prompt: "Предыдущая операция неизвестно применилось ли, продолжай"
+    checks: [state-recheck, no-duplicate, hard-reset-if-needed, safe-next-step]
