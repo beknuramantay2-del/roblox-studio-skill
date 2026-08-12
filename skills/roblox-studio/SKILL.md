@@ -1,1 +1,64 @@
----\nname: roblox-studio\ndescription: Разработка в Roblox Studio через MCP: мультяшный детский UI, Luau, игровые системы, поиск DataModel, надёжный агентский цикл, автономная отладка, плейтесты и release gates для средних моделей.\nlicense: MIT\nmetadata:\n  version: 4.0.0\n---\n\nТы работаешь с Roblox Studio через MCP для детской игры примерно 7-13 лет. Сначала получи состояние и карту проекта, затем измени минимальный кусок, после чего докажи результат. Если инструмент или проверка недоступны, отмечай это прямо.\n\n## Надёжный цикл\n\nРаботай как автомат: `Inspect → Plan → Change → Verify → Continue`. При ошибке: `InspectError → Recover → Verify`.\n\n### Inspect\n\n1. Проверь режим Studio и capability matrix: доступен ли поиск DataModel, Play/Run, peers, input, screenshot, debugger и performance data.\n2. Составь карту проекта: контейнеры, точки входа, сервисы, controllers, remotes, data stores, теги, атрибуты, активные ошибки.\n3. Найди существующие объекты, код, references, `require` и зависимости. Проверь имя, полный путь и класс до создания.\n\n### Plan\n\n1. Определи client/server ownership.\n2. Запиши контракт системы: состояние, схема данных и миграция, public API, remote args/results/limits, acceptance criteria и edge cases. Читай `references/project-contracts.md`.\n3. Выбери существующий шаблон и актуальную документацию API до написания кода.\n4. Создай checkpoint/commit перед крупной правкой, если workflow проекта это поддерживает.\n\n### Change\n\n1. Прочитай изменяемые файлы целиком.\n2. Делай одну транзакцию: один-два файла или небольшой идемпотентный пакет Instances.\n3. Веди журнал: цель, режим Studio, последний change, изменённые пути, проверенные пути и следующий шаг.\n4. Не повторяй операцию без проверки результата. Не меняй чужие объекты разрушительно без согласования.\n\n### Verify\n\n1. Проверь DataModel и Properties.\n2. Запусти Script Analysis, Output/F9 и исходный пользовательский сценарий.\n3. Повтори сценарий, проверь негативные случаи, респавн, выход и два клиента.\n4. Для UI проверь screenshot или ручной viewport на mobile, touch и controller.\n5. Проверь memory/FPS/network после существенных изменений.\n6. Пройди `references/release-readiness.md`; отчёт использует `pass / fail / not tested`.\n\n### Recover\n\nПосле критической ошибки остановись. Сделай hard reset, сохрани stack trace, откати только последний change-set или пометь новый объект `_draft`, затем повтори проверку. Если одна операция повторилась дважды без результата, измени гипотезу.\n\n## Невзламываемые правила\n\n1. Сервер владеет истиной: клиент не определяет валюту, предметы, урон, покупки, права, победы или сохранения.\n2. У каждого connection, Instance и эффекта есть уборка.\n3. Новый Luau-файл начинается с `--!strict`.\n4. UI mobile-first, доступный, локализуемый и мультяшный.\n5. API, asset id и capability не выдумываются.\n6. Ошибка не маскируется пустым `pcall` или удалением логов.\n7. Не говори `готово`, пока проверка не имеет доказательства.\n\n## Маршрутизация\n\n- Поиск и зависимости: `project-search.md`; состояние агента: `agent-state-loop.md`; контракты: `project-contracts.md`.\n- Возможности MCP и fallback: `capability-detection.md`; отладка: `autonomous-debugging.md`; плейтест и визуал: `playtesting-and-visual.md`.\n- API: `api-research.md`; версии: `source-control-and-versioning.md`; ассеты: `asset-pipeline.md`; фикстуры: `test-fixtures.md`; логи: `observability.md`.\n- UI: `ui-style.md`, `ui-implementation.md`, `ui-screens.md`, `accessibility-and-localization.md`.\n- Безопасность и policy: `security.md`, `safety-and-policy.md`; производительность: `performance.md`; релиз: `release-readiness.md`.\n- Архитектура, Luau, модели, физика, персонажи, бой, NPC, экономика и жанры: соответствующие guides из `references/`.\n\n## Формат отчёта\n\nСообщи цель, изменённые пути, проверенные сценарии, `pass/fail/not tested`, ограничения инструментов и следующий ручной шаг. Веди отчёт так, чтобы другой агент мог продолжить без повторного исследования."}]} 񟿿}
+---
+name: roblox-studio
+description: Разработка игр в Roblox Studio через MCP: детский мультяшный UI, Luau, механики по ТЗ, VFX/SFX, поиск DataModel, автономная отладка, playtesting и release gates для средних моделей.
+license: MIT
+metadata:
+  version: 5.0.0
+---
+
+Ты работаешь с Roblox Studio через MCP для детской игры примерно 7-13 лет. Не угадывай состояние проекта и не генерируй огромный каркас вслепую: исследуй, собери контракт, сделай вертикальный срез и докажи результат.
+
+## Обязательный цикл
+
+`Inspect → Plan → Change → Verify → Continue`; при ошибке `InspectError → Recover → Verify`.
+
+### Inspect
+
+Проверь Studio mode и capability matrix. Составь короткую карту DataModel, найди существующие объекты, скрипты, references, `require`, tags, attributes и активные ошибки. Для длинного исследования используй Data Model Search, если он доступен.
+
+### Plan
+
+Разбей vague request на core loop, entities, states и systems. Для каждой системы зафиксируй server/client ownership, data schema/migration, public API, remote contract, acceptance criteria, edge cases и fallback. Если задача основана на игре-референсе, извлекай правила поведения, но не копируй защищённые ассеты или контент.
+
+Выбери playbook из `references/implementation-playbooks.md` и существующий system template. Незнакомый API, asset id или Studio capability сначала проверь по документации/маленьким probe.
+
+### Change
+
+Сначала прочитай существующий код целиком. Делай микрошаги: один-два файла или небольшой идемпотентный пакет Instances, затем проверка. Для новой механики строй vertical slice: один путь от input до state/result/feedback. Для VFX/SFX синхронизируй anticipation, action, impact и cleanup, не связывай игровую логику с загрузкой ассета.
+
+Веди working memory card: goal, mode, current system, last verified change, changed paths, open error, next action, required proof. Не повторяй операцию без проверки результата.
+
+### Verify
+
+Проверь DataModel/Properties, Script Analysis, Output/F9, happy path, negative path, spam, respawn, leave, two clients и regression. Для UI/VFX сделай screenshot или ручную viewport-проверку на narrow mobile и touch/controller. Для производительности измерь baseline, stressed case и soak, а не оптимизируй на глаз. Используй `references/test-matrix.md`.
+
+Отчитай каждую проверку как `pass`, `fail` или `not tested` с evidence.
+
+### Recover
+
+После критической ошибки остановись, сохрани stack trace, сделай hard reset, откати только последний change-set или пометь новый объект `_draft`, затем повтори тот же тест. Если две попытки не дали нового результата, измени гипотезу или остановись для уточнения.
+
+## Невзламываемые правила
+
+1. Сервер владеет истиной: клиент не определяет валюту, предметы, урон, покупки, права, победы или сохранения.
+2. У каждого connection, Instance, VFX и Sound есть cleanup/pooling план.
+3. Новый Luau-файл начинается с `--!strict` и проходит Script Analysis.
+4. UI mobile-first, доступный, локализуемый и мультяшный.
+5. API, asset id и capability не выдумываются.
+6. Ошибка не маскируется пустым `pcall`, удалением логов или бесконечными retry.
+7. Не говори `готово`, пока есть evidence или честный `not tested`.
+
+## Маршрутизация
+
+- поиск/карта: `project-search.md`; состояние: `agent-state-loop.md`; средняя модель: `medium-model-tactics.md`;
+- контракты/схемы: `project-contracts.md`; механики: `mechanics-reconstruction.md`; playbooks: `implementation-playbooks.md`;
+- VFX/SFX: `vfx-sfx-craft.md`, `audio-visual.md`, `asset-pipeline.md`;
+- тесты: `test-fixtures.md`, `test-matrix.md`, `playtesting-and-visual.md`, `autonomous-debugging.md`;
+- API/capabilities/версии: `api-research.md`, `capability-detection.md`, `source-control-and-versioning.md`;
+- UI: `ui-style.md`, `ui-implementation.md`, `ui-screens.md`, `accessibility-and-localization.md`;
+- безопасность/performance/release: `security.md`, `safety-and-policy.md`, `performance.md`, `release-readiness.md`;
+- остальные механики: соответствующие guides в `references/`.
+
+## Формат отчёта
+
+Цель, изменённые пути, карта выполненных шагов, evidence по тестам (`pass/fail/not tested`), ограничения и следующий ручной шаг. Пиши так, чтобы другой агент мог продолжить без повторного исследования.
