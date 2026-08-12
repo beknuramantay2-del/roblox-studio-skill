@@ -1,42 +1,40 @@
 ---
 name: roblox-studio
-description: Разработка игр в Roblox Studio через MCP: детский мультяшный UI, Luau, механики по ТЗ, VFX/SFX, поиск DataModel, автономная отладка, playtesting и release gates для средних моделей.
+description: Разработка игр в Roblox Studio через MCP: детский мультяшный UI, Luau, механики по ТЗ, VFX/SFX, поиск DataModel, автономная отладка и защита от типичных ошибок средних моделей.
 license: MIT
 metadata:
-  version: 5.0.1
+  version: 5.1.0
 ---
 
-Ты работаешь с Roblox Studio через MCP для детской игры примерно 7-13 лет. Не угадывай состояние проекта и не генерируй огромный каркас вслепую: исследуй, собери контракт, сделай вертикальный срез и докажи результат.
+Ты работаешь с Roblox Studio через MCP для детской игры примерно 7-13 лет. Переводи запрос человека в implementation brief, исследуй существующий DataModel, собери контракт и vertical slice, затем докажи результат.
 
 ## Обязательный цикл
 
-`Inspect → Plan → Change → Verify → Continue`; при ошибке `InspectError → Recover → Verify`.
+`Interpret → Inspect → Plan → Change → Verify → Continue`; при ошибке `InspectError → Recover → Verify`.
+
+### Interpret
+
+Сначала выпиши goal, player action, expected feedback, state change, server/client ownership, existing paths, failure cases, proof и out of scope. Читай `references/request-translation.md`. Если запрос основан на референсе, извлекай поведение и темп, но не копируй защищённые ассеты или контент.
 
 ### Inspect
 
-Проверь Studio mode и capability matrix. Составь короткую карту DataModel, найди существующие объекты, скрипты, references, `require`, tags, attributes и активные ошибки. Для длинного исследования используй Data Model Search, если он доступен.
+Проверь Studio mode и capability matrix. Составь короткую карту DataModel, найди объекты, скрипты, references, `require`, tags, attributes и активные ошибки. Используй `references/ai-failure-patterns.md` как preflight; для длинного поиска используй Data Model Search, если доступен.
 
 ### Plan
 
-Разбей vague request на core loop, entities, states и systems. Для каждой системы зафиксируй server/client ownership, data schema/migration, public API, remote contract, acceptance criteria, edge cases и fallback. Если задача основана на игре-референсе, извлекай правила поведения, но не копируй защищённые ассеты или контент.
-
-Выбери playbook из `references/implementation-playbooks.md` и существующий system template. Незнакомый API, asset id или Studio capability сначала проверь по документации/маленьким probe.
+Разбей задачу на core loop, entities, states и systems. Зафиксируй data schema/migration, один writer для каждого domain value, public API, remote contract, acceptance table, fallback и выбранный playbook. Для незнакомого API/asset/capability сначала сделай документационный research или безопасный probe.
 
 ### Change
 
-Сначала прочитай существующий код целиком. Делай микрошаги: один-два файла или небольшой идемпотентный пакет Instances, затем проверка. Для новой механики строй vertical slice: один путь от input до state/result/feedback. Для VFX/SFX синхронизируй anticipation, action, impact и cleanup, не связывай игровую логику с загрузкой ассета. Для аудио сначала выбери modern Audio objects или документированный legacy fallback.
-
-Веди working memory card: goal, mode, current system, last verified change, changed paths, open error, next action, required proof. Не повторяй операцию без проверки результата.
+Прочитай существующий код целиком. Делай микрошаги и vertical slice: input → validation → state/result → feedback → cleanup. Для VFX/SFX используй recipe из `vfx-sfx-craft.md`, для механик `mechanics-patterns.md`. После каждого yield revalidate player, Instance и state. Не повторяй операцию без проверки.
 
 ### Verify
 
-Проверь DataModel/Properties, Script Analysis, Output/F9, happy path, negative path, spam, respawn, leave, two clients и regression. Для UI/VFX сделай screenshot или ручную viewport-проверку на narrow mobile и touch/controller. Для производительности измерь baseline, stressed case и soak, а не оптимизируй на глаз. Используй `references/test-matrix.md`.
-
-Отчитай каждую проверку как `pass`, `fail` или `not tested` с evidence.
+Проверь DataModel/Properties, Script Analysis, Output/F9, happy/negative path, spam, duplicate, respawn, leave, reconnect, two clients и regression. Для UI/VFX сделай screenshot или ручную viewport-проверку на mobile/touch/controller. Для performance измерь baseline, stress и soak. Перед `готово` пройди failure-pattern preflight и `test-matrix.md`; каждая проверка имеет `pass/fail/not tested` и evidence.
 
 ### Recover
 
-После критической ошибки остановись, сохрани stack trace, сделай hard reset, откати только последний change-set или пометь новый объект `_draft`, затем повтори тот же тест. Если две попытки не дали нового результата, измени гипотезу или остановись для уточнения.
+После критической ошибки остановись, сохрани stack trace, hard reset, откати последний change-set или пометь новый объект `_draft`, затем повтори тот же тест. После двух безрезультатных попыток измени гипотезу или попроси уточнение.
 
 ## Невзламываемые правила
 
@@ -44,16 +42,17 @@ metadata:
 2. У каждого connection, Instance, VFX и Sound есть cleanup/pooling план.
 3. Новый Luau-файл начинается с `--!strict` и проходит Script Analysis.
 4. UI mobile-first, доступный, локализуемый и мультяшный.
-5. API, asset id и capability не выдумываются.
+5. API, asset id, capability и смысл не выдумываются.
 6. Ошибка не маскируется пустым `pcall`, удалением логов или бесконечными retry.
 7. Не говори `готово`, пока есть evidence или честный `not tested`.
 
 ## Маршрутизация
 
-- поиск/карта: `project-search.md`; состояние: `agent-state-loop.md`; средняя модель: `medium-model-tactics.md`;
-- контракты/схемы: `project-contracts.md`; механики: `mechanics-reconstruction.md`; playbooks: `implementation-playbooks.md`;
+- перевод запроса: `request-translation.md`; ошибки ИИ/Roblox: `ai-failure-patterns.md`; Luau: `luau-mental-model.md`;
+- семантика Roblox: `roblox-semantics.md`; архитектура: `architecture-decisions.md`;
+- механики: `mechanics-reconstruction.md`, `mechanics-patterns.md`, `implementation-playbooks.md`;
 - VFX/SFX: `vfx-sfx-craft.md`, `audio-visual.md`, `audio-modern.md`, `asset-pipeline.md`;
-- тесты: `test-fixtures.md`, `test-matrix.md`, `playtesting-and-visual.md`, `autonomous-debugging.md`;
+- поиск/состояние/тесты: `project-search.md`, `medium-model-tactics.md`, `test-fixtures.md`, `test-matrix.md`, `autonomous-debugging.md`;
 - API/capabilities/версии: `api-research.md`, `capability-detection.md`, `source-control-and-versioning.md`;
 - UI: `ui-style.md`, `ui-implementation.md`, `ui-screens.md`, `accessibility-and-localization.md`;
 - безопасность/performance/release: `security.md`, `safety-and-policy.md`, `performance.md`, `release-readiness.md`;
@@ -61,4 +60,4 @@ metadata:
 
 ## Формат отчёта
 
-Цель, изменённые пути, карта выполненных шагов, evidence по тестам (`pass/fail/not tested`), ограничения и следующий ручной шаг. Пиши так, чтобы другой агент мог продолжить без повторного исследования.
+Цель, interpretation, изменённые пути, карта шагов, evidence (`pass/fail/not tested`), ограничения и следующий ручной шаг. Пиши так, чтобы другой агент мог продолжить без повторного исследования.
